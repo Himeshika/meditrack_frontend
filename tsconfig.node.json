@@ -19,5 +19,9 @@
     "noUncheckedSideEffectImports": true,
     "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "vite-env.d.ts",
+    "src/vite-env.d.ts"
+  ]
 }
