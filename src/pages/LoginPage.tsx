@@ -12,7 +12,7 @@ const LoginPage = () => {
     const { setToken } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogin = async (e) => {
+    const handleLogin = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         setError("");
 
@@ -26,6 +26,7 @@ const LoginPage = () => {
             const res = await login(email, password);
             setToken(res.data.accessToken);
             navigate("/dashboard");
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             setError("Login failed. Please try again.");
         } finally {

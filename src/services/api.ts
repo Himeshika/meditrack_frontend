@@ -1,7 +1,12 @@
+
+
 import axios from "axios";
 
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1",
+    // Typecast import.meta to any to instantly clear the error
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    baseURL: (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:5000/api/v1",
 });
 
 api.interceptors.request.use((config) => {

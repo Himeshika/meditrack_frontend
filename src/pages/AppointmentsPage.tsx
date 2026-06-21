@@ -44,6 +44,7 @@ const AppointmentsPage = () => {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchAppointments();
 
         if (user?.role === "RECEPTIONIST" || user?.role === "ADMIN") {

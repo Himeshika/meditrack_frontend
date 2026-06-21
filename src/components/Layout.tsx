@@ -145,7 +145,8 @@ const Layout = ({ children }: Props) => {
                                 <div className="hidden sm:block">
                                     <p className="text-xs font-semibold text-slate-700 leading-tight">{user?.name}</p>
                                     <p className="text-xs text-slate-400 leading-tight">
-                                        {user?.role?.charAt(0) + user?.role?.slice(1).toLowerCase()}
+
+                                        {user?.role && (user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase())}
                                     </p>
                                 </div>
                             </div>

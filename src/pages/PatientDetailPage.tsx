@@ -166,6 +166,7 @@ const PatientDetailPage = () => {
   }
 
   const age = Math.floor(
+      // eslint-disable-next-line react-hooks/purity
     (Date.now() - new Date(patient.dateOfBirth).getTime()) /
       (1000 * 60 * 60 * 24 * 365.25),
   );

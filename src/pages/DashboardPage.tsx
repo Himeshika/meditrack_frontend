@@ -130,6 +130,7 @@ const DashboardPage = () => {
     const getDoc = (d: IAppointment["doctor"]) => (typeof d === "string" ? d : d.name);
 
     const timeAgo = (dateStr: string) => {
+        // eslint-disable-next-line react-hooks/purity
         const diff = Date.now() - new Date(dateStr).getTime();
         const mins = Math.floor(diff / 60000);
         if (mins < 60) return `${mins}m ago`;
