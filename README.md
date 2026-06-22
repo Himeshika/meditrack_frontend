@@ -2,7 +2,7 @@
 
 The client-side application for **MediTrack**, a patient medical record management system. Built with React 19, TypeScript, and Tailwind CSS v4, featuring JWT authentication, role-based routing, and data visualisation with Recharts.
 
-**Live App:** https://meditrack-frontend-mocha.vercel.app
+**Live App:** https://meditrack-web.vercel.app
 
 **Backend Repo:** https://github.com/Himeshika/meditrack_backend
 
