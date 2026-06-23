@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "sonner";
 import { getPatientById, type IPatient } from "../services/patientService";
 import {
   getPatientVisitHistory,
@@ -41,7 +42,8 @@ const PatientDetailPage = () => {
   // Upload panel state
   const [showUpload, setShowUpload] = useState(false);
   const [uploadVisitId, setUploadVisitId] = useState("");
-  const [uploadFileType, setUploadFileType] = useState<FileType>("MEDICAL_REPORT");
+  const [uploadFileType, setUploadFileType] =
+    useState<FileType>("MEDICAL_REPORT");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -74,7 +76,10 @@ const PatientDetailPage = () => {
       } catch (err: unknown) {
         const e = err as { message: string };
         console.log("PATIENT DETAIL ERROR:", e.message);
-        setError("Failed to load patient data.");
+        const msg = "Unauthorized! Receptionists can't access patient details.";
+
+        setError(msg);
+        toast.error(msg);
       } finally {
         setLoading(false);
       }
@@ -100,24 +105,39 @@ const PatientDetailPage = () => {
       setUploadVisitId("");
       setUploadFile(null);
       setUploadFileType("MEDICAL_REPORT");
+      toast.success("Medical file uploaded successfully");
     } catch (err: unknown) {
       const e = err as { message: string };
-      setUploadError(e.message || "Upload failed.");
+      const msg = e.message || "Upload failed.";
+
+      setUploadError(msg);
+      toast.error(msg);
     } finally {
       setUploadLoading(false);
     }
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    if (!confirm("Delete this file?")) return;
-    try {
-      await deleteMedicalFile(fileId);
-      setFiles((prev) => prev.filter((f) => f._id !== fileId));
-    } catch (err: unknown) {
-      const e = err as { message: string };
-      console.log("DELETE FILE ERROR:", e.message);
-      alert("Failed to delete file.");
-    }
+    toast("Delete this file?", {
+      action: {
+        label: "Delete",
+        onClick: async () => {
+          try {
+            await deleteMedicalFile(fileId);
+
+            setFiles((prev) => prev.filter((f) => f._id !== fileId));
+
+            toast.success("File deleted successfully");
+          } catch (err: unknown) {
+            const e = err as { message: string };
+
+            console.log("DELETE FILE ERROR:", e.message);
+
+            toast.error("Failed to delete file");
+          }
+        },
+      },
+    });
   };
 
   const handleAISummary = async () => {
@@ -126,10 +146,11 @@ const PatientDetailPage = () => {
       setAiLoading(true);
       const res = await getAIPatientSummary(id);
       setAiSummary(res.data.summary);
+      toast.success("AI summary generated");
     } catch (err: unknown) {
       const e = err as { message: string };
       console.log("AI SUMMARY ERROR:", e.message);
-      alert("AI summary failed.");
+      toast.error("Failed to generate AI summary");
     } finally {
       setAiLoading(false);
     }
@@ -144,10 +165,11 @@ const PatientDetailPage = () => {
       setAppointments((prev) =>
         prev.map((a) => (a._id === apptId ? { ...a, status } : a)),
       );
+      toast.success(`Appointment marked as ${status}`);
     } catch (err: unknown) {
       const e = err as { message: string };
       console.log("STATUS UPDATE ERROR:", e.message);
-      alert("Failed to update appointment status.");
+      toast.error("Failed to update appointment status");
     }
   };
 
@@ -166,7 +188,7 @@ const PatientDetailPage = () => {
   }
 
   const age = Math.floor(
-      // eslint-disable-next-line react-hooks/purity
+    // eslint-disable-next-line react-hooks/purity
     (Date.now() - new Date(patient.dateOfBirth).getTime()) /
       (1000 * 60 * 60 * 24 * 365.25),
   );
@@ -309,11 +331,15 @@ const PatientDetailPage = () => {
               {/* Inline upload panel */}
               {showUpload && (
                 <div className="mt-3 bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
-                  <h3 className="text-sm font-semibold text-slate-700">Upload Medical File</h3>
+                  <h3 className="text-sm font-semibold text-slate-700">
+                    Upload Medical File
+                  </h3>
 
                   {/* Visit selector */}
                   <div>
-                    <label className="block text-xs text-slate-500 mb-1">Select Visit *</label>
+                    <label className="block text-xs text-slate-500 mb-1">
+                      Select Visit *
+                    </label>
                     <select
                       value={uploadVisitId}
                       onChange={(e) => setUploadVisitId(e.target.value)}
@@ -322,39 +348,52 @@ const PatientDetailPage = () => {
                       <option value="">-- Choose a visit --</option>
                       {visits.map((v) => (
                         <option key={v._id} value={v._id}>
-                          {new Date(v.visitDate).toLocaleDateString()} — {v.diagnosis}
+                          {new Date(v.visitDate).toLocaleDateString()} —{" "}
+                          {v.diagnosis}
                         </option>
                       ))}
                     </select>
                     {visits.length === 0 && (
-                      <p className="text-xs text-amber-600 mt-1">No visits recorded for this patient yet.</p>
+                      <p className="text-xs text-amber-600 mt-1">
+                        No visits recorded for this patient yet.
+                      </p>
                     )}
                   </div>
 
                   {/* File type selector */}
                   <div>
-                    <label className="block text-xs text-slate-500 mb-1">File Type *</label>
+                    <label className="block text-xs text-slate-500 mb-1">
+                      File Type *
+                    </label>
                     <select
                       value={uploadFileType}
-                      onChange={(e) => setUploadFileType(e.target.value as FileType)}
+                      onChange={(e) =>
+                        setUploadFileType(e.target.value as FileType)
+                      }
                       className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
                     >
                       <option value="MEDICAL_REPORT">Medical Report</option>
                       <option value="BLOOD_REPORT">Blood Report</option>
                       <option value="XRAY">X-Ray</option>
                       <option value="SCAN_REPORT">Scan Report</option>
-                      <option value="PRESCRIPTION_IMAGE">Prescription Image</option>
+                      <option value="PRESCRIPTION_IMAGE">
+                        Prescription Image
+                      </option>
                       <option value="OTHER">Other</option>
                     </select>
                   </div>
 
                   {/* File input */}
                   <div>
-                    <label className="block text-xs text-slate-500 mb-1">Choose File *</label>
+                    <label className="block text-xs text-slate-500 mb-1">
+                      Choose File *
+                    </label>
                     <input
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png,.dicom,.dcm"
-                      onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+                      onChange={(e) =>
+                        setUploadFile(e.target.files?.[0] ?? null)
+                      }
                       className="w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 cursor-pointer"
                     />
                   </div>
@@ -385,7 +424,9 @@ const PatientDetailPage = () => {
                 className="bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between"
               >
                 <div>
-                  <p className="text-sm font-medium text-slate-700">{f.fileName}</p>
+                  <p className="text-sm font-medium text-slate-700">
+                    {f.fileName}
+                  </p>
                   <p className="text-xs text-slate-400 mt-0.5">
                     {f.fileType} · {new Date(f.uploadedAt).toLocaleDateString()}
                   </p>
